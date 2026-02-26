@@ -126,9 +126,7 @@ if act_selection == "Act I: The New Geography of Work":
 
     st.success("""
     **Act I Conclusion:**  
-    Work mode is not randomly distributed.
-    Industry, region, and experience appear to shape how flexibility is allocated.
-    This structural pattern sets the foundation for deeper behavioral analysis in Act II.
+    Work mode adoption appears structurally balanced across industries, regions, and experience levels, indicating a globally diversified and policy-driven shift toward flexible work models.
     """)
 
 # ==================================================
@@ -603,6 +601,7 @@ elif act_selection == "Employee Persona Spotlight":
     Comparing them with others helps reveal whether physical activity, company support,
     sleep quality, or stress levels differentiate sustainable performers.
     """)
+
 
 
 
