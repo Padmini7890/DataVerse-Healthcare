@@ -478,108 +478,130 @@ elif act_selection == "Systemic Links":
 elif act_selection == "Employee Persona Spotlight":
     st.header("👤 Employee Persona Spotlight")
 
-    col1, col2 = st.columns(2)
+    # ==================================================
+    # 🔥 Persona 1: High-Risk Performer
+    # Definition: Increased Productivity + High Stress + Poor Sleep
+    # ==================================================
 
-        # 🔥 Persona 1: At-Risk Star
-    with col1:
-        st.subheader("🔥 The At-Risk Star")
+    high_risk = df[
+        (df["Productivity_Change"].str.lower().str.contains("increase")) &
+        (df["Stress_Level"].str.lower().str.contains("high")) &
+        (df["Sleep_Quality"].str.lower().str.contains("poor"))
+    ]
 
-        # Flexible matching for categorical text
-        at_risk = df[
-            (df["Productivity_Change"].str.lower().str.contains("increase")) &
-            (df["Stress_Level"].str.lower().str.contains("high")) &
-            (df["Sleep_Quality"].str.lower().str.contains("poor"))
-        ]
+    st.subheader("🔥 High-Risk Performer Count")
+    st.write(len(high_risk))
 
-        st.metric("Number of At-Risk High Performers", len(at_risk))
+    if not high_risk.empty:
+        risk_dist = (
+            high_risk.groupby("Work_Location")
+            .size()
+            .reset_index(name="Count")
+        )
 
-        if not at_risk.empty:
-            at_risk_dist = (
-                at_risk.groupby("Work_Location")
-                .size()
-                .reset_index(name="Count")
-            )
+        fig_risk = px.bar(
+            risk_dist,
+            x="Work_Location",
+            y="Count",
+            text_auto=True,
+            title="High-Risk Performers by Work Mode"
+        )
 
-            fig1 = px.bar(
-                at_risk_dist,
-                x="Work_Location",
-                y="Count",
-                text_auto=True
-            )
+        st.plotly_chart(fig_risk, use_container_width=True)
+    else:
+        st.info("No employees match Increased Productivity + High Stress + Poor Sleep.")
 
-            fig1.update_traces(
-                hovertemplate="Work Mode: %{x}<br>Count: %{y}"
-            )
+    # ==================================================
+    # 🌿 Persona 2: Resilient Work-Lifer
+    # ==================================================
 
-            st.plotly_chart(fig1, use_container_width=True)
-        else:
-            st.info("No employees match High Stress + Poor Sleep + Increased Productivity.")
+    # -----------------------------------------
+    # STEP 1: Identify High Workload Employees
+    # -----------------------------------------
+    avg_hours = df["Hours_Worked_Per_Week"].mean()
+    avg_meetings = df["Number_of_Virtual_Meetings"].mean()
 
-                # 🌿 Persona 2: Resilient Work-Lifer (High WLB despite High Load)
-    with col2:
-        st.subheader("🌿 The Resilient Work-Lifer")
+    df["High_Workload"] = (
+        (df["Hours_Worked_Per_Week"] > avg_hours) |
+        (df["Number_of_Virtual_Meetings"] > avg_meetings)
+    )
 
-        # Define high workload using median split
-        high_hours = df["Hours_Worked_Per_Week"] > df["Hours_Worked_Per_Week"].median()
-        many_meetings = df["Number_of_Virtual_Meetings"] > df["Number_of_Virtual_Meetings"].median()
+    # -----------------------------------------
+    # STEP 2: Identify Resilient Work-Lifers
+    # High Workload + High Work-Life Balance (>=4)
+    # -----------------------------------------
+    df["Resilient_Work_Lifer"] = (
+        (df["High_Workload"] == True) &
+        (df["Work_Life_Balance_Rating"] >= 4)
+    )
 
-        # Highest Work-Life Balance
-        max_wlb = df["Work_Life_Balance_Rating"].max()
-        high_wlb = df["Work_Life_Balance_Rating"] == max_wlb
+    # -----------------------------------------
+    # STEP 3: Show Count
+    # -----------------------------------------
+    st.subheader("Resilient Work-Lifer Count")
+    resilient_count = df["Resilient_Work_Lifer"].value_counts()
+    st.write(resilient_count)
 
-        # Resilient = High WLB despite high workload
-        resilient = df[high_wlb & (high_hours | many_meetings)]
+    # -----------------------------------------
+    # STEP 4: Comparison Charts
+    # -----------------------------------------
 
-        st.metric("Number of Resilient Employees", len(resilient))
+    st.subheader("Physical Activity Comparison")
+    fig1 = px.box(
+        df,
+        x="Resilient_Work_Lifer",
+        y="Physical_Activity",
+        title="Physical Activity: Resilient vs Others"
+    )
+    st.plotly_chart(fig1, use_container_width=True)
 
-        if not resilient.empty:
-                        # Compare Physical Activity (Pie Chart)
-            activity_dist = (
-                resilient.groupby("Physical_Activity")
-                .size()
-                .reset_index(name="Count")
-            )
+    st.subheader("Company Support Comparison")
+    fig2 = px.box(
+        df,
+        x="Resilient_Work_Lifer",
+        y="Company_Support_for_Remote_Work",
+        title="Company Support: Resilient vs Others"
+    )
+    st.plotly_chart(fig2, use_container_width=True)
 
-            fig2 = px.pie(
-                activity_dist,
-                names="Physical_Activity",
-                values="Count",
-                hole=0.3
-            )
+    st.subheader("Sleep Quality Comparison")
+    fig3 = px.box(
+        df,
+        x="Resilient_Work_Lifer",
+        y="Sleep_Quality",
+        title="Sleep Quality: Resilient vs Others"
+    )
+    st.plotly_chart(fig3, use_container_width=True)
 
-            fig2.update_traces(
-                textinfo="percent+label",
-                hovertemplate="Activity Level: %{label}<br>Count: %{value}<br>Percentage: %{percent}"
-            )
+    st.subheader("Stress Level Comparison")
+    fig4 = px.box(
+        df,
+        x="Resilient_Work_Lifer",
+        y="Stress_Level",
+        title="Stress Levels: Resilient vs Others"
+    )
+    st.plotly_chart(fig4, use_container_width=True)
 
-            st.plotly_chart(fig2, use_container_width=True)
+    # -----------------------------------------
+    # STEP 5: Summary Table
+    # -----------------------------------------
 
-            # Compare Company Support (Pie Chart)
-            support_dist = (
-                resilient.groupby("Company_Support_for_Remote_Work")
-                .size()
-                .reset_index(name="Count")
-            )
+    st.subheader("Resilient Work-Lifer Profile Summary")
 
-            fig3 = px.pie(
-                support_dist,
-                names="Company_Support_for_Remote_Work",
-                values="Count",
-                hole=0.3
-            )
+        # Use numeric columns only for summary statistics
+    numeric_cols = df.select_dtypes(include='number').columns.tolist()
 
-            fig3.update_traces(
-                textinfo="percent+label",
-                hovertemplate="Support Level: %{label}<br>Count: %{value}<br>Percentage: %{percent}"
-            )
+    summary = (
+        df.groupby("Resilient_Work_Lifer")[numeric_cols]
+        .mean()
+        .reset_index()
+    )
 
-            st.plotly_chart(fig3, use_container_width=True)
-        else:
-            st.info("No employees maintain highest WLB despite high workload.")
+    st.dataframe(summary)
 
     st.success("""
     **Persona Insight Summary:**  
-    The At-Risk Star highlights employees who are highly productive but show warning signs of burnout.
-    The Resilient Work-Lifer demonstrates that productivity can coexist with strong work-life balance.
-    Leadership focus should be on protecting high performers while replicating resilience factors.
+    Resilient Work-Lifers are employees who maintain strong work-life balance despite higher workload.
+    Comparing them with others helps reveal whether physical activity, company support,
+    sleep quality, or stress levels differentiate sustainable performers.
     """)
