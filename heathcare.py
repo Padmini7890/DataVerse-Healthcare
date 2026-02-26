@@ -533,42 +533,44 @@ elif act_selection == "Employee Persona Spotlight":
         st.metric("Number of Resilient Employees", len(resilient))
 
         if not resilient.empty:
-            # Compare Physical Activity
+                        # Compare Physical Activity (Pie Chart)
             activity_dist = (
                 resilient.groupby("Physical_Activity")
                 .size()
                 .reset_index(name="Count")
             )
 
-            fig2 = px.bar(
+            fig2 = px.pie(
                 activity_dist,
-                x="Physical_Activity",
-                y="Count",
-                text_auto=True
+                names="Physical_Activity",
+                values="Count",
+                hole=0.3
             )
 
             fig2.update_traces(
-                hovertemplate="Activity Level: %{x}<br>Count: %{y}"
+                textinfo="percent+label",
+                hovertemplate="Activity Level: %{label}<br>Count: %{value}<br>Percentage: %{percent}"
             )
 
             st.plotly_chart(fig2, use_container_width=True)
 
-            # Compare Company Support
+            # Compare Company Support (Pie Chart)
             support_dist = (
                 resilient.groupby("Company_Support_for_Remote_Work")
                 .size()
                 .reset_index(name="Count")
             )
 
-            fig3 = px.bar(
+            fig3 = px.pie(
                 support_dist,
-                x="Company_Support_for_Remote_Work",
-                y="Count",
-                text_auto=True
+                names="Company_Support_for_Remote_Work",
+                values="Count",
+                hole=0.3
             )
 
             fig3.update_traces(
-                hovertemplate="Support Level: %{x}<br>Count: %{y}"
+                textinfo="percent+label",
+                hovertemplate="Support Level: %{label}<br>Count: %{value}<br>Percentage: %{percent}"
             )
 
             st.plotly_chart(fig3, use_container_width=True)
