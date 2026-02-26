@@ -210,7 +210,7 @@ elif act_selection == "Act II: The Cost of Connection":
 
     # 3️⃣ Avg Virtual Meetings by Work Mode
     with col3:
-        st.subheader("3. Avg Virtual Meetings by Work Mode")
+        st.subheader("3. Number of Virtual Meetings by Work Mode")
 
         meeting_avg = df.groupby("Work_Location")["Number_of_Virtual_Meetings"].count().reset_index()
 
@@ -605,5 +605,6 @@ elif act_selection == "Employee Persona Spotlight":
     Comparing them with others helps reveal whether physical activity, company support,
     sleep quality, or stress levels differentiate sustainable performers.
     """)
+
 
 
