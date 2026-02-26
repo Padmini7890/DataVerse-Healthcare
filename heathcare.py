@@ -7,7 +7,7 @@ st.set_page_config(layout="wide")
 # Load Data
 df = pd.read_csv("Impact_of_Remote_Work_on_Mental_Health.csv")
 
-st.title("📊 Remote Work: CEO Storytelling Dashboard")
+st.title("📊 Impact of Remote Work")
 
 # ==================================================
 # MAIN ACT DROPDOWN
@@ -605,3 +605,4 @@ elif act_selection == "Employee Persona Spotlight":
     Comparing them with others helps reveal whether physical activity, company support,
     sleep quality, or stress levels differentiate sustainable performers.
     """)
+
