@@ -360,9 +360,9 @@ elif act_selection == "Act III: The Support ROI":
 
     st.success("""
     **Act III Conclusion:**  
-    Company support and access to mental health resources appear linked with productivity outcomes.
-    However, mental health condition may play a stronger role in determining performance shifts.
-    Support policies should focus on both structural aid and psychological well-being.
+    Mental health condition has a stronger observable association with productivity change than company support or access to resources.
+    Company support and access to resources show only mild variation, not strong directional impact.
+    Productivity decline appears influenced more by underlying mental health conditions than organizational support measures alone.
     """)
 
 elif act_selection == "Systemic Links":
@@ -605,6 +605,7 @@ elif act_selection == "Employee Persona Spotlight":
     Comparing them with others helps reveal whether physical activity, company support,
     sleep quality, or stress levels differentiate sustainable performers.
     """)
+
 
 
 
