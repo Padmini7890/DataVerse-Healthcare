@@ -137,11 +137,232 @@ if act_selection == "Act I: The New Geography of Work":
 
 elif act_selection == "Act II: The Cost of Connection":
     st.header("💻 Act II: The Cost of Connection")
-    st.info("Act II visuals will be added here.")
+
+        # Ensure numeric conversion (handle categorical scales properly)
+    # Stress Level
+    if df["Stress_Level"].dtype == "object":
+        df["Stress_Level"] = pd.factorize(df["Stress_Level"])[0] + 1
+    else:
+        df["Stress_Level"] = pd.to_numeric(df["Stress_Level"], errors="coerce")
+
+    # Social Isolation
+    if df["Social_Isolation_Rating"].dtype == "object":
+        df["Social_Isolation_Rating"] = pd.factorize(df["Social_Isolation_Rating"])[0] + 1
+    else:
+        df["Social_Isolation_Rating"] = pd.to_numeric(df["Social_Isolation_Rating"], errors="coerce")
+
+    # Work Life Balance
+    if df["Work_Life_Balance_Rating"].dtype == "object":
+        df["Work_Life_Balance_Rating"] = pd.factorize(df["Work_Life_Balance_Rating"])[0] + 1
+    else:
+        df["Work_Life_Balance_Rating"] = pd.to_numeric(df["Work_Life_Balance_Rating"], errors="coerce")
+
+    df["Number_of_Virtual_Meetings"] = pd.to_numeric(df["Number_of_Virtual_Meetings"], errors="coerce")
+    df["Hours_Worked_Per_Week"] = pd.to_numeric(df["Hours_Worked_Per_Week"], errors="coerce")
+
+    col1, col2 = st.columns(2)
+    col3, col4 = st.columns(2)
+
+    # 1️⃣ Average Isolation by Work Mode (Simple Bar)
+    with col1:
+        st.subheader("1. Avg Social Isolation by Work Mode")
+
+        isolation_avg = df.groupby("Work_Location")["Social_Isolation_Rating"].mean().reset_index()
+
+        fig1 = px.bar(
+            isolation_avg,
+            x="Work_Location",
+            y="Social_Isolation_Rating",
+            text_auto=True
+        )
+
+        fig1.update_traces(
+            hovertemplate="Work Mode: %{x}<br>Avg Isolation: %{y:.2f}"
+        )
+
+        st.plotly_chart(fig1, use_container_width=True)
+
+            # 2️⃣ Average Stress Level by Work Mode (Dot Plot)
+    with col2:
+        st.subheader("2. Average Stress Level by Work Mode")
+
+        stress_avg = df.groupby("Work_Location")["Stress_Level"].mean().reset_index()
+
+        fig2 = px.scatter(
+            stress_avg,
+            x="Work_Location",
+            y="Stress_Level",
+            size=[12]*len(stress_avg)
+        )
+
+        fig2.update_traces(
+            hovertemplate="Work Mode: %{x}<br>Avg Stress Level: %{y:.2f}",
+            marker=dict(symbol="circle")
+        )
+
+        st.plotly_chart(fig2, use_container_width=True)
+
+    # 3️⃣ Average Meetings by Work Mode (Simple Bar)
+    with col3:
+        st.subheader("3. Avg Virtual Meetings by Work Mode")
+
+        meeting_avg = df.groupby("Work_Location")["Number_of_Virtual_Meetings"].mean().reset_index()
+
+        fig3 = px.bar(
+            meeting_avg,
+            x="Work_Location",
+            y="Number_of_Virtual_Meetings",
+            text_auto=True
+        )
+
+        fig3.update_traces(
+            hovertemplate="Work Mode: %{x}<br>Avg Meetings: %{y:.2f}"
+        )
+
+        st.plotly_chart(fig3, use_container_width=True)
+
+    # 4️⃣ Average Work-Life Balance by Work Mode (Simple Bar)
+    with col4:
+        st.subheader("4. Avg Work-Life Balance by Work Mode")
+
+        wlb_avg = df.groupby("Work_Location")["Work_Life_Balance_Rating"].mean().reset_index()
+
+        fig4 = px.bar(
+            wlb_avg,
+            x="Work_Location",
+            y="Work_Life_Balance_Rating",
+            text_auto=True
+        )
+
+        fig4.update_traces(
+            hovertemplate="Work Mode: %{x}<br>Avg Work-Life Balance: %{y:.2f}"
+        )
+
+        st.plotly_chart(fig4, use_container_width=True)
+
+    st.success("""
+    **Act II Conclusion:**  
+    Differences in stress, isolation, meetings, and work-life balance vary across work modes.
+    Digital work does not automatically reduce isolation or stress.
+    Work mode alone may not explain well-being differences.
+    """)
 
 elif act_selection == "Act III: The Support ROI":
     st.header("🏢 Act III: The Support ROI")
-    st.info("Act III visuals will be added here.")
+
+    col1, col2 = st.columns(2)
+    col3, col4 = st.columns(2)
+
+    # 1️⃣ Productivity Change by Company Support
+    with col1:
+        st.subheader("1. Productivity Change by Company Support")
+
+        prod_support = (
+            df.groupby(["Company_Support_for_Remote_Work", "Productivity_Change"])
+            .size()
+            .reset_index(name="Count")
+        )
+
+        fig1 = px.bar(
+            prod_support,
+            x="Company_Support_for_Remote_Work",
+            y="Count",
+            color="Productivity_Change",
+            barmode="group"
+        )
+
+        fig1.update_traces(
+            hovertemplate="Support: %{x}<br>Productivity: %{legendgroup}<br>Count: %{y}"
+        )
+
+        st.plotly_chart(fig1, use_container_width=True)
+
+    # 2️⃣ Productivity Change by Access to Mental Health Resources
+    with col2:
+        st.subheader("2. Productivity Change by Mental Health Access")
+
+        prod_access = (
+            df.groupby(["Access_to_Mental_Health_Resources", "Productivity_Change"])
+            .size()
+            .reset_index(name="Count")
+        )
+
+        fig2 = px.bar(
+            prod_access,
+            x="Access_to_Mental_Health_Resources",
+            y="Count",
+            color="Productivity_Change",
+            barmode="group"
+        )
+
+        fig2.update_traces(
+            hovertemplate="Access: %{x}<br>Productivity: %{legendgroup}<br>Count: %{y}"
+        )
+
+        st.plotly_chart(fig2, use_container_width=True)
+
+    # 3️⃣ Productivity vs Mental Health Condition
+    with col3:
+        st.subheader("3. Productivity Change by Mental Health Condition")
+
+        prod_mental = (
+            df.groupby(["Mental_Health_Condition", "Productivity_Change"])
+            .size()
+            .reset_index(name="Count")
+        )
+
+        fig3 = px.bar(
+            prod_mental,
+            x="Mental_Health_Condition",
+            y="Count",
+            color="Productivity_Change",
+            barmode="group"
+        )
+
+        fig3.update_traces(
+            hovertemplate="Condition: %{x}<br>Productivity: %{legendgroup}<br>Count: %{y}"
+        )
+
+        st.plotly_chart(fig3, use_container_width=True)
+
+    # 4️⃣ Average Productivity (Encoded) by Support Level
+    with col4:
+        st.subheader("4. Avg Productivity Score by Support Level")
+
+        # Encode productivity change
+        productivity_map = {
+            "Decreased": -1,
+            "No Change": 0,
+            "Increased": 1
+        }
+
+        df["Productivity_Score"] = df["Productivity_Change"].map(productivity_map)
+
+        avg_prod = (
+            df.groupby("Company_Support_for_Remote_Work")["Productivity_Score"]
+            .mean()
+            .reset_index()
+        )
+
+        fig4 = px.bar(
+            avg_prod,
+            x="Company_Support_for_Remote_Work",
+            y="Productivity_Score",
+            text_auto=True
+        )
+
+        fig4.update_traces(
+            hovertemplate="Support: %{x}<br>Avg Productivity Score: %{y:.2f}"
+        )
+
+        st.plotly_chart(fig4, use_container_width=True)
+
+    st.success("""
+    **Act III Conclusion:**  
+    Company support and access to mental health resources appear linked with productivity outcomes.
+    However, mental health condition may play a stronger role in determining performance shifts.
+    Support policies should focus on both structural aid and psychological well-being.
+    """)
 
 elif act_selection == "Systemic Links":
     st.header("⚖️ Systemic Links")
