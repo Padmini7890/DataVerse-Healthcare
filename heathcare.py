@@ -138,32 +138,23 @@ if act_selection == "Act I: The New Geography of Work":
 elif act_selection == "Act II: The Cost of Connection":
     st.header("💻 Act II: The Cost of Connection")
 
-        # Ensure numeric conversion (handle categorical scales properly)
-    # Stress Level
+        # --- Ensure Stress Level is usable ---
+    # If Stress_Level is categorical (e.g., Low/Medium/High), encode safely
     if df["Stress_Level"].dtype == "object":
-        df["Stress_Level"] = pd.factorize(df["Stress_Level"])[0] + 1
+        df["Stress_Level"] = pd.Categorical(df["Stress_Level"]).codes + 1
     else:
         df["Stress_Level"] = pd.to_numeric(df["Stress_Level"], errors="coerce")
 
-    # Social Isolation
-    if df["Social_Isolation_Rating"].dtype == "object":
-        df["Social_Isolation_Rating"] = pd.factorize(df["Social_Isolation_Rating"])[0] + 1
-    else:
-        df["Social_Isolation_Rating"] = pd.to_numeric(df["Social_Isolation_Rating"], errors="coerce")
-
-    # Work Life Balance
-    if df["Work_Life_Balance_Rating"].dtype == "object":
-        df["Work_Life_Balance_Rating"] = pd.factorize(df["Work_Life_Balance_Rating"])[0] + 1
-    else:
-        df["Work_Life_Balance_Rating"] = pd.to_numeric(df["Work_Life_Balance_Rating"], errors="coerce")
-
+    # Other numeric columns
+    df["Social_Isolation_Rating"] = pd.to_numeric(df["Social_Isolation_Rating"], errors="coerce")
+    df["Work_Life_Balance_Rating"] = pd.to_numeric(df["Work_Life_Balance_Rating"], errors="coerce")
     df["Number_of_Virtual_Meetings"] = pd.to_numeric(df["Number_of_Virtual_Meetings"], errors="coerce")
     df["Hours_Worked_Per_Week"] = pd.to_numeric(df["Hours_Worked_Per_Week"], errors="coerce")
 
     col1, col2 = st.columns(2)
     col3, col4 = st.columns(2)
 
-    # 1️⃣ Average Isolation by Work Mode (Simple Bar)
+    # 1️⃣ Avg Social Isolation by Work Mode
     with col1:
         st.subheader("1. Avg Social Isolation by Work Mode")
 
@@ -176,33 +167,48 @@ elif act_selection == "Act II: The Cost of Connection":
             text_auto=True
         )
 
+        min_val = isolation_avg["Social_Isolation_Rating"].min()
+        max_val = isolation_avg["Social_Isolation_Rating"].max()
+
+        fig1.update_layout(
+            yaxis=dict(
+                range=[min_val - 0.02, max_val + 0.02],
+                tickformat=".3f",
+                dtick=0.01
+            )
+        )
+
         fig1.update_traces(
-            hovertemplate="Work Mode: %{x}<br>Avg Isolation: %{y:.2f}"
+            hovertemplate="Work Mode: %{x}<br>Avg Isolation: %{y:.3f}"
         )
 
         st.plotly_chart(fig1, use_container_width=True)
 
-            # 2️⃣ Average Stress Level by Work Mode (Dot Plot)
+                    # 2️⃣ Stress Level Count by Work Mode
     with col2:
-        st.subheader("2. Average Stress Level by Work Mode")
+        st.subheader("2. Stress Level Count by Work Mode")
 
-        stress_avg = df.groupby("Work_Location")["Stress_Level"].mean().reset_index()
+        stress_dist = (
+            df.groupby(["Work_Location", "Stress_Level"])
+            .size()
+            .reset_index(name="Count")
+        )
 
-        fig2 = px.scatter(
-            stress_avg,
+        fig2 = px.bar(
+            stress_dist,
             x="Work_Location",
-            y="Stress_Level",
-            size=[12]*len(stress_avg)
+            y="Count",
+            color="Stress_Level",
+            barmode="group"
         )
 
         fig2.update_traces(
-            hovertemplate="Work Mode: %{x}<br>Avg Stress Level: %{y:.2f}",
-            marker=dict(symbol="circle")
+            hovertemplate="Work Mode: %{x}<br>Stress Level: %{legendgroup}<br>Count: %{y}"
         )
 
         st.plotly_chart(fig2, use_container_width=True)
 
-    # 3️⃣ Average Meetings by Work Mode (Simple Bar)
+    # 3️⃣ Avg Virtual Meetings by Work Mode
     with col3:
         st.subheader("3. Avg Virtual Meetings by Work Mode")
 
@@ -221,7 +227,7 @@ elif act_selection == "Act II: The Cost of Connection":
 
         st.plotly_chart(fig3, use_container_width=True)
 
-    # 4️⃣ Average Work-Life Balance by Work Mode (Simple Bar)
+    # 4️⃣ Avg Work-Life Balance by Work Mode
     with col4:
         st.subheader("4. Avg Work-Life Balance by Work Mode")
 
@@ -325,34 +331,29 @@ elif act_selection == "Act III: The Support ROI":
 
         st.plotly_chart(fig3, use_container_width=True)
 
-    # 4️⃣ Average Productivity (Encoded) by Support Level
+        # 4️⃣ Productivity Distribution by Support Level (Stacked % Bar)
     with col4:
-        st.subheader("4. Avg Productivity Score by Support Level")
+        st.subheader("4. Productivity Distribution by Support Level")
 
-        # Encode productivity change
-        productivity_map = {
-            "Decreased": -1,
-            "No Change": 0,
-            "Increased": 1
-        }
-
-        df["Productivity_Score"] = df["Productivity_Change"].map(productivity_map)
-
-        avg_prod = (
-            df.groupby("Company_Support_for_Remote_Work")["Productivity_Score"]
-            .mean()
-            .reset_index()
+        prod_dist = (
+            df.groupby(["Company_Support_for_Remote_Work", "Productivity_Change"])
+            .size()
+            .reset_index(name="Count")
         )
 
+        # Convert to percentage
+        prod_dist["Percentage"] = prod_dist.groupby("Company_Support_for_Remote_Work")["Count"].transform(lambda x: x / x.sum() * 100)
+
         fig4 = px.bar(
-            avg_prod,
+            prod_dist,
             x="Company_Support_for_Remote_Work",
-            y="Productivity_Score",
-            text_auto=True
+            y="Percentage",
+            color="Productivity_Change",
+            barmode="stack"
         )
 
         fig4.update_traces(
-            hovertemplate="Support: %{x}<br>Avg Productivity Score: %{y:.2f}"
+            hovertemplate="Support: %{x}<br>Productivity: %{legendgroup}<br>Percentage: %{y:.1f}%"
         )
 
         st.plotly_chart(fig4, use_container_width=True)
