@@ -248,9 +248,7 @@ elif act_selection == "Act II: The Cost of Connection":
 
     st.success("""
     **Act II Conclusion:**  
-    Differences in stress, isolation, meetings, and work-life balance vary across work modes.
-    Digital work does not automatically reduce isolation or stress.
-    Work mode alone may not explain well-being differences.
+    Hybrid work appears to strike the optimal balance between productivity demands and employee well-being, while fully remote work increases digital interaction without proportionate well-being gains.
     """)
 
 elif act_selection == "Act III: The Support ROI":
@@ -605,6 +603,7 @@ elif act_selection == "Employee Persona Spotlight":
     Comparing them with others helps reveal whether physical activity, company support,
     sleep quality, or stress levels differentiate sustainable performers.
     """)
+
 
 
 
